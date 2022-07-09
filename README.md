@@ -1,4 +1,4 @@
-# scope
+# tcsl-tools
 
 ## Project setup
 ```
