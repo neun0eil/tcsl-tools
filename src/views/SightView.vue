@@ -4,8 +4,8 @@
     <div class="row align-items-center">
       <div class="target col-12 col-md-6">
         <target-c50 />
-        <div @click="mark">
-          <div :style="hitStyle"></div>
+        <div @click="move">
+          <cross-hair :style="hitStyle"></cross-hair>
         </div>
       </div>
       <div class="col-12 col-md-6">
@@ -73,6 +73,7 @@
 
 <script>
 import TargetC50 from "../components/TargetC50.vue";
+import CrossHair from "../components/CrossHair.vue";
 
 const key = "sight",
   absRound = v => Math.abs(Math.round(v)),
@@ -116,9 +117,10 @@ export default {
   },
   components: {
     TargetC50,
+    CrossHair,
   },
   methods: {
-    mark(e) {
+    move(e) {
       this.posX = e.offsetX / e.target.offsetWidth;
       this.posY = e.offsetY / e.target.offsetHeight;
     },
@@ -198,12 +200,11 @@ export default {
   }
   > div {
     position: relative;
-    > div {
+    > svg {
       position: absolute;
-      width: 3%;
-      height: 3%;
-      border-radius: 50%;
-      background-color: red;
+      width: 10%;
+      height: 10%;
+      fill: red;
       transform: translate(-50%, -50%);
       pointer-events: none;
     }
