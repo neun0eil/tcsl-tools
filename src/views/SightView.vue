@@ -1,11 +1,12 @@
 <template>
   <div class="container my-3">
-    <h1 class="display-3 text-center mb-3">Réglage visée</h1>
     <div class="row align-items-center">
-      <div class="target col-12 col-md-6 mb-3 mb-md-0">
-        <target-c50 />
-        <div @click="move">
-          <cross-hair :style="hitStyle"></cross-hair>
+      <div class="col-12 col-md-6 mb-3 mb-md-0">
+        <div class="target">
+          <target-c50 />
+          <div @click="move">
+            <cross-hair :style="hitStyle"></cross-hair>
+          </div>
         </div>
       </div>
       <div class="col-12 col-md-6">
@@ -99,7 +100,7 @@ import Hammer from "hammerjs";
 const key = "sight",
   absRound = v => Math.abs(Math.round(v)),
   posToPct = v => v * 100 + "%",
-  posToMm = v => (v - 0.5) * 1100;
+  posToMm = v => (v - 0.5) * 1000;
 
 export default {
   data() {
@@ -239,11 +240,12 @@ export default {
 <style scoped lang="scss">
 .target {
   display: grid;
+  position: relative;
   > * {
     grid-area: 1/-1;
   }
   > div {
-    position: relative;
+    overflow: hidden;
     > svg {
       position: absolute;
       width: 10%;

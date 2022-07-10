@@ -11,6 +11,7 @@ const routes = [
     path: "/sight",
     name: "sight",
     component: () => import("../views/SightView.vue"),
+    meta: { title: "Réglage visée" },
   },
 ];
 
