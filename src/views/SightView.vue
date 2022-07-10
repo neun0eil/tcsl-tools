@@ -93,8 +93,8 @@
 </template>
 
 <script>
-import TargetC50 from "../components/TargetC50.vue";
-import CrossHair from "../components/CrossHair.vue";
+import TargetC50 from "@/components/TargetC50.vue";
+import CrossHair from "@/components/CrossHair.vue";
 import Hammer from "hammerjs";
 
 const key = "sight",
@@ -239,6 +239,7 @@ export default {
 
 <style scoped lang="scss">
 .target {
+  cursor: crosshair;
   display: grid;
   position: relative;
   > * {
@@ -268,12 +269,12 @@ export default {
     border-left: 0;
   }
 }
-
 table i {
   aspect-ratio: 1/1;
   height: 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: grab;
 }
 </style>

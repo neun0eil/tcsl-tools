@@ -7,6 +7,4 @@ import "bootstrap";
 
 import "@fortawesome/fontawesome-free/css/all.css";
 
-import "hammerjs";
-
 createApp(App).use(router).mount("#app");

@@ -1,12 +1,14 @@
 <template>
   <nav-bar :title="title" />
-  <main class="overflow-hidden flex-fill">
+  <main
+    class="overflow-hidden flex-fill d-flex justify-content-center align-items-center"
+  >
     <router-view />
   </main>
 </template>
 
 <script>
-import NavBar from "./components/NavBar.vue";
+import NavBar from "@/components/NavBar.vue";
 
 const DEFAULT_TITLE = "Outils TCSL";
 
