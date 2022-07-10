@@ -53,7 +53,7 @@
             </table>
           </div>
           <div class="col-6">
-            <div class="mb-3 form-floating with-button">
+            <div class="form-floating with-button">
               <input
                 @focus="select"
                 v-model.number="range"
@@ -71,7 +71,7 @@
             </div>
           </div>
           <div class="col-6">
-            <div class="mb-3 form-floating">
+            <div class="form-floating">
               <select
                 v-model.number="type"
                 class="form-select border-dark"
