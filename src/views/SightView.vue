@@ -2,7 +2,7 @@
   <div class="container my-3">
     <h1 class="display-3 text-center mb-3">Réglage visée</h1>
     <div class="row align-items-center">
-      <div class="target col-12 col-md-6">
+      <div class="target col-12 col-md-6 mb-3 mb-md-0">
         <target-c50 />
         <div @click="move">
           <cross-hair :style="hitStyle"></cross-hair>
@@ -14,8 +14,28 @@
             <table class="table table-bordered border-dark">
               <thead class="table-dark">
                 <tr>
-                  <th :colspan="showX && 2">Dérive {{ dirX }}</th>
-                  <th :colspan="showY && 2">Élévation {{ dirY }}</th>
+                  <th :colspan="showX && 2">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      Dérive {{ dirX }}
+                      <i
+                        class="fa-solid fa-arrows-left-right border border-light rounded"
+                        v-pan="panX"
+                      ></i>
+                    </div>
+                  </th>
+                  <th :colspan="showY && 2">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      Élévation {{ dirY }}
+                      <i
+                        class="fa-solid fa-arrows-up-down border border-light rounded"
+                        v-pan="panY"
+                      ></i>
+                    </div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -74,6 +94,7 @@
 <script>
 import TargetC50 from "../components/TargetC50.vue";
 import CrossHair from "../components/CrossHair.vue";
+import Hammer from "hammerjs";
 
 const key = "sight",
   absRound = v => Math.abs(Math.round(v)),
@@ -115,6 +136,15 @@ export default {
       deep: true,
     },
   },
+  directives: {
+    pan: {
+      created(e, b) {
+        const mc = new Hammer(e);
+        mc.get("pan").set({ direction: Hammer.DIRECTION_ALL });
+        mc.on("pan", b.value);
+      },
+    },
+  },
   components: {
     TargetC50,
     CrossHair,
@@ -123,6 +153,20 @@ export default {
     move(e) {
       this.posX = e.offsetX / e.target.offsetWidth;
       this.posY = e.offsetY / e.target.offsetHeight;
+    },
+    panX(e) {
+      e.preventDefault();
+      let v;
+      if (e.direction === Hammer.DIRECTION_LEFT) v = -0.0005;
+      if (e.direction === Hammer.DIRECTION_RIGHT) v = +0.0005;
+      if (v !== undefined) this.posX += v;
+    },
+    panY(e) {
+      e.preventDefault();
+      let v;
+      if (e.direction === Hammer.DIRECTION_UP) v = -0.0005;
+      if (e.direction === Hammer.DIRECTION_DOWN) v = +0.0005;
+      if (v !== undefined) this.posY += v;
     },
     select(e) {
       e.target.select();
@@ -221,5 +265,13 @@ export default {
     border-bottom-left-radius: 0;
     border-left: 0;
   }
+}
+
+table i {
+  aspect-ratio: 1/1;
+  height: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
