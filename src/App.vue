@@ -1,8 +1,6 @@
 <template>
   <nav-bar :title="title" />
-  <main
-    class="overflow-hidden flex-fill d-flex justify-content-center align-items-center"
-  >
+  <main class="overflow-hidden">
     <router-view />
   </main>
 </template>

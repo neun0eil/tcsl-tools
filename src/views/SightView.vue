@@ -22,7 +22,7 @@
                       Dérive {{ dirX }}
                       <i
                         class="fa-solid fa-arrows-left-right border border-light rounded"
-                        v-pan="panX"
+                        v-panX="panX"
                       ></i>
                     </div>
                   </th>
@@ -33,7 +33,7 @@
                       Élévation {{ dirY }}
                       <i
                         class="fa-solid fa-arrows-up-down border border-light rounded"
-                        v-pan="panY"
+                        v-panY="panY"
                       ></i>
                     </div>
                   </th>
@@ -98,9 +98,13 @@ import CrossHair from "@/components/CrossHair.vue";
 import Hammer from "hammerjs";
 
 const key = "sight",
+  step = 5000,
   absRound = v => Math.abs(Math.round(v)),
   posToPct = v => v * 100 + "%",
   posToMm = v => (v - 0.5) * 1000;
+
+let prevX = null,
+  prevY = null;
 
 export default {
   data() {
@@ -138,10 +142,17 @@ export default {
     },
   },
   directives: {
-    pan: {
+    panX: {
       created(e, b) {
         const mc = new Hammer(e);
-        mc.get("pan").set({ direction: Hammer.DIRECTION_ALL });
+        mc.get("pan");
+        mc.on("pan", b.value);
+      },
+    },
+    panY: {
+      created(e, b) {
+        const mc = new Hammer(e);
+        mc.get("pan").set({ direction: Hammer.DIRECTION_VERTICAL });
         mc.on("pan", b.value);
       },
     },
@@ -157,17 +168,15 @@ export default {
     },
     panX(e) {
       e.preventDefault();
-      let v;
-      if (e.direction === Hammer.DIRECTION_LEFT) v = -0.0005;
-      if (e.direction === Hammer.DIRECTION_RIGHT) v = +0.0005;
-      if (v !== undefined) this.posX += v;
+      if (prevX === null) prevX = this.posX;
+      this.posX = prevX + e.deltaX / step;
+      if (e.isFinal) prevX = null;
     },
     panY(e) {
       e.preventDefault();
-      let v;
-      if (e.direction === Hammer.DIRECTION_UP) v = -0.0005;
-      if (e.direction === Hammer.DIRECTION_DOWN) v = +0.0005;
-      if (v !== undefined) this.posY += v;
+      if (prevY === null) prevY = this.posY;
+      this.posY = prevY + e.deltaY / step;
+      if (e.isFinal) prevY = null;
     },
     select(e) {
       e.target.select();
