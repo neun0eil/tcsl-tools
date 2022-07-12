@@ -1,6 +1,6 @@
 <template>
   <nav-bar :title="title" />
-  <main class="overflow-hidden">
+  <main>
     <router-view />
   </main>
 </template>
@@ -28,7 +28,8 @@ export default {
 </script>
 
 <style scoped lang="scss">
-#app > main {
+main {
+  overflow: hidden;
   margin-top: 56px !important;
 }
 </style>
