@@ -1,30 +1,25 @@
 <template>
-  <nav-bar :title="title" />
+  <NavBar :title="title" />
   <main>
     <router-view />
   </main>
 </template>
 
-<script>
-import NavBar from "@/components/NavBar.vue";
+<script setup>
+import { ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import NavBar from '@/components/NavBar.vue';
 
-const DEFAULT_TITLE = "Outils TCSL";
+const DEFAULT_TITLE = 'Outils TCSL';
+const route = useRoute();
+const title = ref(DEFAULT_TITLE);
 
-export default {
-  data() {
-    return {
-      title: DEFAULT_TITLE,
-    };
-  },
-  components: {
-    NavBar,
-  },
-  watch: {
-    $route(t) {
-      this.title = document.title = t.meta.title || DEFAULT_TITLE;
-    },
-  },
-};
+watch(
+  () => route.name,
+  () => {
+    title.value = document.title = route.meta.title || DEFAULT_TITLE;
+  }
+);
 </script>
 
 <style scoped lang="scss">

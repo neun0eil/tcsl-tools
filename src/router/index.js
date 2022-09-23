@@ -1,17 +1,17 @@
-import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import { createRouter, createWebHistory } from 'vue-router';
+import HomeView from '../views/HomeView.vue';
 
 const routes = [
   {
-    path: "/",
-    name: "home",
+    path: '/',
+    name: 'home',
     component: HomeView,
   },
   {
-    path: "/sight",
-    name: "sight",
-    component: () => import("../views/SightView.vue"),
-    meta: { title: "Réglage visée" },
+    path: '/sight',
+    name: 'sight',
+    component: () => import('../views/SightView.vue'),
+    meta: { title: 'Réglage visée' },
   },
 ];
 

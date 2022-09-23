@@ -3,9 +3,9 @@
     <div class="row align-items-center">
       <div class="col-12 col-md-6 mb-3 mb-md-0">
         <div class="target">
-          <target-c50 />
-          <div @click="move">
-            <cross-hair :style="hitStyle"></cross-hair>
+          <TargetC50 />
+          <div @click="onClick">
+            <CrossHair :style="data.style"></CrossHair>
           </div>
         </div>
       </div>
@@ -15,40 +15,29 @@
             <table class="table table-bordered border-dark">
               <thead class="table-dark">
                 <tr>
-                  <th :colspan="showX && 2">
-                    <div
-                      class="d-flex justify-content-between align-items-center"
-                    >
-                      Dérive {{ dirX }}
+                  <th :colspan="data.show.x && 2">
+                    <div class="d-flex justify-content-between align-items-center">
+                      Dérive {{ direction(data.offset.x, 'gauche', 'droite') }}
                       <i
                         class="fa-solid fa-arrows-left-right border border-light rounded"
-                        v-panX="panX"
+                        v-pan-x
                       ></i>
                     </div>
                   </th>
-                  <th :colspan="showY && 2">
-                    <div
-                      class="d-flex justify-content-between align-items-center"
-                    >
-                      Élévation {{ dirY }}
-                      <i
-                        class="fa-solid fa-arrows-up-down border border-light rounded"
-                        v-panY="panY"
-                      ></i>
+                  <th :colspan="data.show.y && 2">
+                    <div class="d-flex justify-content-between align-items-center">
+                      Élévation {{ direction(data.offset.y, 'haute', 'basse') }}
+                      <i class="fa-solid fa-arrows-up-down border border-light rounded" v-pan-y></i>
                     </div>
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>{{ roundX }} mm</td>
-                  <td v-if="showX">
-                    {{ clickX }} clic{{ clickX > 1 ? "s" : "" }}
-                  </td>
-                  <td>{{ roundY }} mm</td>
-                  <td v-if="showY">
-                    {{ clickY }} clic{{ clickY > 1 ? "s" : "" }}
-                  </td>
+                  <td>{{ absolute(data.offset.x) }} mm</td>
+                  <td v-if="data.show.x">{{ data.click.x }} clic{{ plural(data.click.x) }}</td>
+                  <td>{{ absolute(data.offset.y) }} mm</td>
+                  <td v-if="data.show.y">{{ data.click.y }} clic{{ plural(data.click.y) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -56,28 +45,21 @@
           <div class="col-6">
             <div class="form-floating with-button">
               <input
-                @focus="select"
                 v-model.number="range"
                 type="number"
                 class="form-control border-dark"
                 id="range"
+                @focus="$event.target.select()"
               />
               <label for="range">Distance</label>
-              <button
-                class="input-group-text rounded-end border-dark"
-                @click="metric = !metric"
-              >
-                {{ metric ? "m" : "yd" }}
+              <button class="input-group-text rounded-end border-dark" @click="metric = !metric">
+                {{ metric ? 'm' : 'yd' }}
               </button>
             </div>
           </div>
           <div class="col-6">
             <div class="form-floating">
-              <select
-                v-model.number="type"
-                class="form-select border-dark"
-                id="type"
-              >
+              <select v-model.number="type" class="form-select border-dark" id="type">
                 <option value="1">1/4 MOA</option>
                 <option value="2">1/8 MOA</option>
                 <option value="3">0.1 mil</option>
@@ -92,158 +74,120 @@
   </div>
 </template>
 
-<script>
-import TargetC50 from "@/components/TargetC50.vue";
-import CrossHair from "@/components/CrossHair.vue";
-import Hammer from "hammerjs";
+<script setup>
+import { ref, reactive, computed, onMounted, watch } from 'vue';
+import TargetC50 from '@/components/TargetC50.vue';
+import CrossHair from '@/components/CrossHair.vue';
+import Hammer from 'hammerjs';
 
-const key = "sight",
-  step = 5000,
-  absRound = v => Math.abs(Math.round(v)),
-  posToPct = v => v * 100 + "%",
-  posToMm = v => (v - 0.5) * 1000;
+const TYPES = {
+  1: Math.tan(((0.25 / 60) * Math.PI) / 180),
+  2: Math.tan(((0.125 / 60) * Math.PI) / 180),
+  3: Math.tan(0.0001),
+  4: Math.tan(0.00005),
+};
 
-let prevX = null,
-  prevY = null;
+const key = 'sight';
+const step = 5000;
 
-export default {
-  data() {
-    return {
-      posX: 0.5,
-      posY: 0.5,
-      range: 100,
-      metric: true,
-      type: 1,
-    };
-  },
-  mounted() {
-    const json = localStorage.getItem(key);
-    if (json) {
-      try {
-        const data = JSON.parse(json);
-        Object.assign(this, data);
-      } catch (e) {
-        localStorage.removeItem(key);
-        console.error(e);
-      }
-    }
-  },
-  watch: {
-    $data: {
-      handler(v) {
-        try {
-          const json = JSON.stringify({ ...v });
-          localStorage.setItem(key, json);
-        } catch (e) {
-          console.error(e);
-        }
-      },
-      deep: true,
-    },
-  },
-  directives: {
-    panX: {
-      created(e, b) {
-        const mc = new Hammer(e);
-        mc.get("pan");
-        mc.on("pan", b.value);
-      },
-    },
-    panY: {
-      created(e, b) {
-        const mc = new Hammer(e);
-        mc.get("pan").set({ direction: Hammer.DIRECTION_VERTICAL });
-        mc.on("pan", b.value);
-      },
-    },
-  },
-  components: {
-    TargetC50,
-    CrossHair,
-  },
-  methods: {
-    move(e) {
-      this.posX = e.offsetX / e.target.offsetWidth;
-      this.posY = e.offsetY / e.target.offsetHeight;
-    },
-    panX(e) {
+const range = ref(100);
+const type = ref(1);
+const posX = ref(0.5);
+const posY = ref(0.5);
+const metric = ref(true);
+
+const state = reactive({ range, type, posX, posY, metric });
+
+const plural = (v) => (v > 1 ? 's' : '');
+const absolute = (v) => Math.abs(Math.round(v));
+const percent = (v) => `${v * 100}%`;
+const posToMm = (v) => (v - 0.5) * 1000;
+const mmToClk = (v) =>
+  Math.abs(
+    Math.round(v / (TYPES[type.value] * (metric.value ? range.value : range.value * 0.9144) * 1000))
+  );
+const direction = (v, over, under) => (v === 0 ? '' : v < 0 ? over : under);
+
+const data = computed(() => {
+  const offset = {
+    x: posToMm(posX.value),
+    y: posToMm(posY.value),
+  };
+  const click = {
+    x: mmToClk(offset.x),
+    y: mmToClk(offset.y),
+  };
+  const style = {
+    left: percent(posX.value),
+    top: percent(posY.value),
+  };
+  const show = {
+    x: Number.isInteger(click.x) || null,
+    y: Number.isInteger(click.y) || null,
+  };
+  return {
+    offset,
+    click,
+    style,
+    show,
+  };
+});
+
+let prevX = null;
+let prevY = null;
+
+onMounted(() => {
+  const json = localStorage.getItem(key);
+  if (!json) return;
+  try {
+    Object.assign(state, JSON.parse(json));
+  } catch (e) {
+    localStorage.removeItem(key);
+  }
+});
+
+function onClick(e) {
+  posX.value = e.offsetX / e.target.offsetWidth;
+  posY.value = e.offsetY / e.target.offsetHeight;
+}
+
+const vPanX = {
+  created(e) {
+    const mc = new Hammer(e);
+    mc.get('pan');
+    mc.on('pan', (e) => {
       e.preventDefault();
-      if (prevX === null) prevX = this.posX;
-      this.posX = prevX + e.deltaX / step;
+      if (prevX === null) prevX = posX.value;
+      posX.value = prevX + e.deltaX / step;
       if (e.isFinal) prevX = null;
-    },
-    panY(e) {
-      e.preventDefault();
-      if (prevY === null) prevY = this.posY;
-      this.posY = prevY + e.deltaY / step;
-      if (e.isFinal) prevY = null;
-    },
-    select(e) {
-      e.target.select();
-    },
-    mmToClk(v) {
-      const range = this.metric ? this.range : this.range * 0.9144;
-      return Math.abs(Math.round(v / (this.ratio * range * 1000)));
-    },
-  },
-  computed: {
-    hitStyle() {
-      return {
-        top: posToPct(this.posY),
-        left: posToPct(this.posX),
-      };
-    },
-    ratio() {
-      let ratio;
-      switch (this.type) {
-        case 1:
-          ratio = Math.tan(((0.25 / 60) * Math.PI) / 180);
-          break;
-        case 2:
-          ratio = Math.tan(((0.125 / 60) * Math.PI) / 180);
-          break;
-        case 3:
-          ratio = Math.tan(0.0001);
-          break;
-        case 4:
-          ratio = Math.tan(0.00005);
-      }
-      return ratio;
-    },
-    offsetX() {
-      return posToMm(this.posX);
-    },
-    offsetY() {
-      return posToMm(this.posY);
-    },
-    roundX() {
-      return absRound(this.offsetX);
-    },
-    roundY() {
-      return absRound(this.offsetY);
-    },
-    dirX() {
-      if (this.offsetX === 0) return "";
-      return this.offsetX < 0 ? "gauche" : "droite";
-    },
-    dirY() {
-      if (this.offsetY === 0) return "";
-      return this.offsetY < 0 ? "haute" : "basse";
-    },
-    clickX() {
-      return this.mmToClk(this.offsetX);
-    },
-    clickY() {
-      return this.mmToClk(this.offsetY);
-    },
-    showX() {
-      return Number.isInteger(this.clickX) || null;
-    },
-    showY() {
-      return Number.isInteger(this.clickY) || null;
-    },
+    });
   },
 };
+
+const vPanY = {
+  created(e) {
+    const mc = new Hammer(e);
+    mc.get('pan').set({ direction: Hammer.DIRECTION_VERTICAL });
+    mc.on('pan', (e) => {
+      e.preventDefault();
+      if (prevY === null) prevY = posY.value;
+      posY.value = prevY + e.deltaY / step;
+      if (e.isFinal) prevY = null;
+    });
+  },
+};
+
+watch(
+  () => state,
+  () => {
+    try {
+      localStorage.setItem(key, JSON.stringify(state));
+    } catch (e) {
+      console.error(e);
+    }
+  },
+  { deep: true }
+);
 </script>
 
 <style scoped lang="scss">

@@ -5,7 +5,7 @@
         <a href="/" class="logo mx-auto">
           <img src="@/assets/logo.svg" alt="Logo" />
         </a>
-        <router-link class="btn btn-dark btn-lg" to="/sight">
+        <router-link class="btn btn-dark btn-lg" :to="{ name: 'sight' }">
           Réglage visée
         </router-link>
       </div>
