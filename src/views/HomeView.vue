@@ -8,6 +8,9 @@
         <router-link class="btn btn-dark btn-lg" :to="{ name: 'sight' }">
           Réglage visée
         </router-link>
+        <router-link class="btn btn-dark btn-lg" :to="{ name: 'license' }">
+          Impression licence
+        </router-link>
       </div>
     </div>
   </div>

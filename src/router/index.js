@@ -13,6 +13,12 @@ const routes = [
     component: () => import('../views/SightView.vue'),
     meta: { title: 'Réglage visée' },
   },
+  {
+    path: '/license',
+    name: 'license',
+    component: () => import('../views/LicenseView.vue'),
+    meta: { title: 'Impression licence' },
+  },
 ];
 
 const router = createRouter({

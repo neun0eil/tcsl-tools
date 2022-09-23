@@ -8,10 +8,13 @@
       <div class="collapse navbar-collapse" ref="navbar">
         <ul class="navbar-nav">
           <li class="nav-item">
-            <router-link class="nav-link" :to="{ name: 'home' }"> Accueil </router-link>
+            <router-link class="nav-link" :to="{ name: 'home' }">Accueil</router-link>
           </li>
           <li>
-            <router-link class="nav-link" :to="{ name: 'sight' }"> Réglage visée </router-link>
+            <router-link class="nav-link" :to="{ name: 'sight' }">Réglage visée</router-link>
+          </li>
+          <li>
+            <router-link class="nav-link" :to="{ name: 'license' }">Impression licence</router-link>
           </li>
         </ul>
       </div>

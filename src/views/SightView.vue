@@ -142,6 +142,7 @@ onMounted(() => {
   try {
     Object.assign(state, JSON.parse(json));
   } catch (e) {
+    console.error(e);
     localStorage.removeItem(key);
   }
 });
