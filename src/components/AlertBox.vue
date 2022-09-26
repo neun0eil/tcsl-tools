@@ -1,7 +1,9 @@
 <template>
   <div class="alert d-flex align-items-center gap-3" :class="`alert-${color}`" role="alert">
-    <i class="fa-solid" :class="`fa-${icon}`"></i>
-    <div>{{ message }}</div>
+    <i class="fa-solid align-self-start" :class="`fa-${icon}`"></i>
+    <div>
+      <slot>{{ message }}</slot>
+    </div>
   </div>
 </template>
 
@@ -20,7 +22,7 @@ const message = ref(props.message);
 </script>
 
 <style lang="scss">
-  .alert > i {
-    font-size: 2rem;
-  }
+.alert > i {
+  font-size: 2rem;
+}
 </style>

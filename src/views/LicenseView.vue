@@ -2,14 +2,18 @@
   <div class="container my-3">
     <div class="row justify-content-md-center">
       <div class="col-12 col-md-6">
-        <AlertBox
-          message="Selectionnez l'image téléchargée depuis votr espace EDEN puis cliquez sur 'Générer le PDF'"
-        />
+        <AlertBox>
+          <ul class="mb-0">
+            <li>Selectionnez l'image téléchargée depuis votre espace EDEN</li>
+            <li>Choisissez un format</li>
+            <li>cliquez sur 'Générer le PDF'</li>
+          </ul>
+        </AlertBox>
         <input class="form-control mb-3" type="file" @change="onChange" :accept="TYPES.join(',')" />
         <img class="img-fluid border rounded mb-3" v-if="image" :src="image" />
         <div class="border rounded mb-3 d-flex p-3 gap-3">
           <span>Format&nbsp;:</span>
-          <div class="form-check" v-for="[k] of Object.entries(formats)" :key="k">
+          <div class="form-check" v-for="[k] of Object.entries(FORMATS)" :key="k">
             <input
               class="form-check-input"
               type="radio"
@@ -43,21 +47,25 @@ import slugify from 'slugify';
 import { ref, computed } from 'vue';
 import { jsPDF } from 'jspdf';
 
-const name = ref();
-const image = ref();
-const file = computed(() =>
-  slugify(name.value.replaceAll('_', '-').replace(/\.[^.$]+$/, ''), { lower: true })
-);
-const processing = ref(false);
-const selected = ref(1);
-
-const formats = {
+const FORMATS = {
   1: { w: 3.37, h: 2.125 },
   2: { w: 4.134, h: 2.913 },
   3: { w: 4.921, h: 3.465 },
 };
 
 const TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+
+const name = ref();
+const image = ref();
+const processing = ref(false);
+const selected = ref(1);
+
+const file = computed(
+  () =>
+    `${slugify(name.value.replaceAll('_', '-').replace(/\.[^.$]+$/, ''), { lower: true })}-id${
+      selected.value
+    }`
+);
 
 function onChange(e) {
   const [file] = e.target.files;
@@ -72,14 +80,14 @@ function onChange(e) {
 function makePDF() {
   return new Promise((resolve, reject) => {
     try {
-      const { w, h } = formats[selected.value];
+      const { w, h } = FORMATS[selected.value];
       const doc = new jsPDF({ format: 'a4', unit: 'in' });
       doc.setFontSize(12);
       doc.setLineWidth(0.01);
       doc.setLineDash([0.04], 0);
-      doc.text(name.value, 1, 1);
-      doc.addImage(image.value, 'png', 1, 1.5, w, h, 'license', 'none', 0);
-      doc.addImage(image.value, 'png', 1 + w, 1.5, w, h, 'license', 'none', 180);
+      doc.text(`${name.value} (ID-${selected.value})`, 1, 1);
+      doc.addImage(image.value, 'png', 1, 1.5, w, h, 'license', 'slow', 0);
+      doc.addImage(image.value, 'png', 1 + w, 1.5, w, h, 'license', 'slow', 180);
       doc.roundedRect(1, 1.5, w, h, 0.125, 0.125);
       doc.roundedRect(1, 1.5 + h, w, h, 0.125, 0.125);
       doc.save(`${file.value}.pdf`);
