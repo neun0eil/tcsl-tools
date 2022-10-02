@@ -3,7 +3,6 @@ import { jsPDF } from 'jspdf';
 onmessage = (e) => {
   try {
     const { format, image, ratio } = e.data;
-    console.log(ratio);
     const { w, h } = format;
     const r = w / h;
     const l = ratio > r;
