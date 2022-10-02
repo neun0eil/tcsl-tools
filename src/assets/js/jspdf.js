@@ -1,9 +1,9 @@
 import { jsPDF } from 'jspdf';
 
 onmessage = (e) => {
-  const { selected, format, name, image } = e.data;
-  const { w, h } = format;
   try {
+    const { selected, format, name, image } = e.data;
+    const { w, h } = format;
     const doc = new jsPDF({ format: 'a4', unit: 'in' });
     doc.setFontSize(12);
     doc.setLineWidth(0.01);
@@ -15,6 +15,7 @@ onmessage = (e) => {
     doc.roundedRect(1, 1.5 + h, w, h, 0.125, 0.125);
     postMessage(doc.output('blob'));
   } catch (e) {
+    console.error(e);
     postMessage(null);
   }
 };
