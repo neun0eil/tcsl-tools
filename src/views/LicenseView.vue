@@ -42,7 +42,7 @@
           </div>
           <span v-else>Générer le PDF</span>
         </button>
-        <a ref="download" :href="href" class="d-none" :download="file">Enregistrer le PDF</a>
+        <a ref="link" :href="href" class="d-none" target="_blank"></a>
       </div>
     </div>
   </div>
@@ -50,8 +50,7 @@
 
 <script setup>
 import AlertBox from '@/components/AlertBox.vue';
-import slugify from 'slugify';
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, watch, nextTick } from 'vue';
 
 const FORMATS = {
   1: { w: 3.37, h: 2.125 },
@@ -61,13 +60,12 @@ const FORMATS = {
 
 const TYPES = ['image/jpeg', 'image/png', 'image/gif'];
 
-const name = ref();
 const image = ref();
 const img = ref();
 const processing = ref(false);
 const selected = ref(1);
 const href = ref();
-const download = ref();
+const link = ref();
 
 const worker = new Worker(new URL('@/assets/js/jspdf', import.meta.url));
 
@@ -75,34 +73,24 @@ worker.onmessage = async (e) => {
   processing.value = false;
   if (e.data) {
     href.value = URL.createObjectURL(e.data);
-    await nextTick(() => download.value.click());
+    await nextTick(() => link.value.click());
   }
 };
-
-const file = computed(() => {
-  if (!name.value) return undefined;
-  return `${slugify(name.value.replaceAll('_', '-').replace(/\.[^.$]+$/, ''), { lower: true })}-id${
-    selected.value
-  }`;
-});
 
 function onChange(e) {
   href.value = null;
   const [file] = e.target.files;
   if (!file || !TYPES.includes(file.type)) {
-    name.value = image.value = e.target.value = null;
+    image.value = e.target.value = null;
     return;
   }
-  name.value = file.name;
   image.value = URL.createObjectURL(file);
 }
 
 function onClick() {
   processing.value = true;
   worker.postMessage({
-    selected: selected.value,
     format: FORMATS[selected.value],
-    name: name.value,
     image: image.value,
     ratio: img.value.naturalWidth / img.value.naturalHeight,
   });
