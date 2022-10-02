@@ -1,5 +1,5 @@
 <template>
-  <div class="alert d-flex align-items-center gap-3" :class="`alert-${color}`" role="alert">
+  <div class="alert d-flex align-items-center gap-3 mb-0" :class="`alert-${color}`" role="alert">
     <i class="fa-solid align-self-start" :class="`fa-${icon}`"></i>
     <div>
       <slot>{{ message }}</slot>
