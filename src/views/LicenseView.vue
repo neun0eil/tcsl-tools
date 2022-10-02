@@ -16,7 +16,7 @@
           @change="onChange"
           :accept="TYPES.join(',')"
         />
-        <img class="img-fluid border rounded" v-if="image" :src="image" />
+        <img class="img-fluid border rounded" v-if="image" :src="image" ref="img" />
         <div class="border rounded d-flex p-3 gap-3">
           <span>Format&nbsp;:</span>
           <div class="form-check" v-for="[k] of Object.entries(FORMATS)" :key="k">
@@ -63,6 +63,7 @@ const TYPES = ['image/jpeg', 'image/png', 'image/gif'];
 
 const name = ref();
 const image = ref();
+const img = ref();
 const processing = ref(false);
 const selected = ref(1);
 const href = ref();
@@ -103,6 +104,7 @@ function onClick() {
     format: FORMATS[selected.value],
     name: name.value,
     image: image.value,
+    ratio: img.value.naturalWidth / img.value.naturalHeight,
   });
 }
 
