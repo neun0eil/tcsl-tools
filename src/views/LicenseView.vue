@@ -72,6 +72,7 @@ const worker = new Worker(new URL('@/assets/js/jspdf', import.meta.url));
 worker.onmessage = async ({ data }) => {
   processing.value = false;
   if (data) {
+    revoke(href);
     href.value = URL.createObjectURL(data);
     await nextTick(() => link.value.click());
   }
