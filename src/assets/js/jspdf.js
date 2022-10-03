@@ -1,8 +1,8 @@
 import { jsPDF } from 'jspdf';
 
-onmessage = (e) => {
+onmessage = ({ data }) => {
   try {
-    const { format, image, ratio } = e.data;
+    const { format, image, ratio } = data;
     const { w, h } = format;
     const r = w / h;
     const l = ratio > r;

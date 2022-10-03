@@ -69,19 +69,26 @@ const link = ref();
 
 const worker = new Worker(new URL('@/assets/js/jspdf', import.meta.url));
 
-worker.onmessage = async (e) => {
+worker.onmessage = async ({ data }) => {
   processing.value = false;
-  if (e.data) {
-    href.value = URL.createObjectURL(e.data);
+  if (data) {
+    href.value = URL.createObjectURL(data);
     await nextTick(() => link.value.click());
   }
 };
 
-function onChange(e) {
-  href.value = null;
-  const [file] = e.target.files;
+function revoke(ref) {
+  if (!ref.value) return;
+  URL.revokeObjectURL(ref.value);
+  ref.value = null;
+}
+
+function onChange({ target }) {
+  revoke(href);
+  revoke(image);
+  const [file] = target.files;
   if (!file || !TYPES.includes(file.type)) {
-    image.value = e.target.value = null;
+    target.value = null;
     return;
   }
   image.value = URL.createObjectURL(file);
@@ -97,6 +104,13 @@ function onClick() {
 }
 
 watch(selected, () => {
-  href.value = null;
+  revoke(href);
 });
 </script>
+
+<style scoped>
+.img-fluid {
+  aspect-ratio: 16/10;
+  object-fit: contain;
+}
+</style>
