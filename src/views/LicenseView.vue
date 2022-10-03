@@ -1,7 +1,7 @@
 <template>
   <div class="container my-3">
     <div class="row justify-content-md-center">
-      <div class="col-12 col-md-6 d-flex flex-column gap-3">
+      <div class="col-12 col-lg-6 d-flex flex-column gap-3">
         <AlertBox>
           <ul class="mb-0">
             <li>Selectionnez l'image téléchargée depuis votre espace EDEN</li>
