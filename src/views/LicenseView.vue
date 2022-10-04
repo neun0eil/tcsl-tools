@@ -96,6 +96,10 @@ function onChange({ target }) {
 }
 
 function onClick() {
+  if (href.value) {
+    link.value.click();
+    return;
+  }
   processing.value = true;
   worker.postMessage({
     format: FORMATS[selected.value],
