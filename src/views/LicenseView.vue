@@ -1,23 +1,29 @@
 <template>
   <div class="container my-3">
     <div class="row justify-content-md-center">
-      <div class="col-12 col-md-6">
+      <div class="col-12 col-lg-6 d-flex flex-column gap-3">
         <AlertBox>
           <ul class="mb-0">
             <li>Selectionnez l'image téléchargée depuis votre espace EDEN</li>
             <li>Choisissez un format</li>
-            <li>cliquez sur 'Générer le PDF'</li>
+            <li>Cliquez sur 'Générer le PDF'</li>
           </ul>
         </AlertBox>
-        <input class="form-control mb-3" type="file" @change="onChange" :accept="TYPES.join(',')" />
-        <img class="img-fluid border rounded mb-3" v-if="image" :src="image" />
-        <div class="border rounded mb-3 d-flex p-3 gap-3">
+        <input
+          :disabled="processing"
+          class="form-control"
+          type="file"
+          @change="onChange"
+          :accept="TYPES.join(',')"
+        />
+        <img class="img-fluid border rounded" v-if="image" :src="image" ref="img" />
+        <div class="border rounded d-flex p-3 gap-3">
           <span>Format&nbsp;:</span>
           <div class="form-check" v-for="[k] of Object.entries(FORMATS)" :key="k">
             <input
+              :disabled="processing"
               class="form-check-input"
               type="radio"
-              name="flexRadioDefault"
               :id="`format-${k}`"
               :value="k"
               v-model.number="selected"
@@ -36,6 +42,7 @@
           </div>
           <span v-else>Générer le PDF</span>
         </button>
+        <a ref="link" :href="href" class="d-none" target="_blank"></a>
       </div>
     </div>
   </div>
@@ -43,9 +50,7 @@
 
 <script setup>
 import AlertBox from '@/components/AlertBox.vue';
-import slugify from 'slugify';
-import { ref, computed } from 'vue';
-import { jsPDF } from 'jspdf';
+import { ref, watch, nextTick } from 'vue';
 
 const FORMATS = {
   1: { w: 3.37, h: 2.125 },
@@ -55,52 +60,62 @@ const FORMATS = {
 
 const TYPES = ['image/jpeg', 'image/png', 'image/gif'];
 
-const name = ref();
 const image = ref();
+const img = ref();
 const processing = ref(false);
 const selected = ref(1);
+const href = ref();
+const link = ref();
 
-const file = computed(
-  () =>
-    `${slugify(name.value.replaceAll('_', '-').replace(/\.[^.$]+$/, ''), { lower: true })}-id${
-      selected.value
-    }`
-);
+const worker = new Worker(new URL('@/assets/js/jspdf', import.meta.url));
 
-function onChange(e) {
-  const [file] = e.target.files;
+worker.onmessage = async ({ data }) => {
+  processing.value = false;
+  if (data) {
+    revoke(href);
+    href.value = URL.createObjectURL(data);
+    await nextTick(() => link.value.click());
+  }
+};
+
+function revoke(ref) {
+  if (!ref.value) return;
+  URL.revokeObjectURL(ref.value);
+  ref.value = null;
+}
+
+function onChange({ target }) {
+  revoke(href);
+  revoke(image);
+  const [file] = target.files;
   if (!file || !TYPES.includes(file.type)) {
-    e.target.value = null;
+    target.value = null;
     return;
   }
-  name.value = file.name;
   image.value = URL.createObjectURL(file);
 }
 
-function makePDF() {
-  return new Promise((resolve, reject) => {
-    try {
-      const { w, h } = FORMATS[selected.value];
-      const doc = new jsPDF({ format: 'a4', unit: 'in' });
-      doc.setFontSize(12);
-      doc.setLineWidth(0.01);
-      doc.setLineDash([0.04], 0);
-      doc.text(`${name.value} (ID-${selected.value})`, 1, 1);
-      doc.addImage(image.value, 'png', 1, 1.5, w, h, 'license', 'slow', 0);
-      doc.addImage(image.value, 'png', 1 + w, 1.5, w, h, 'license', 'slow', 180);
-      doc.roundedRect(1, 1.5, w, h, 0.125, 0.125);
-      doc.roundedRect(1, 1.5 + h, w, h, 0.125, 0.125);
-      doc.save(`${file.value}.pdf`);
-      resolve(doc);
-    } catch (e) {
-      reject(null);
-    }
+function onClick() {
+  if (href.value) {
+    link.value.click();
+    return;
+  }
+  processing.value = true;
+  worker.postMessage({
+    format: FORMATS[selected.value],
+    image: image.value,
+    ratio: img.value.naturalWidth / img.value.naturalHeight,
   });
 }
 
-async function onClick() {
-  processing.value = true;
-  await makePDF();
-  processing.value = false;
-}
+watch(selected, () => {
+  revoke(href);
+});
 </script>
+
+<style scoped>
+.img-fluid {
+  aspect-ratio: 16/10;
+  object-fit: contain;
+}
+</style>

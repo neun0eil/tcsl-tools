@@ -1,12 +1,12 @@
 <template>
-  <nav class="fixed-top navbar navbar-dark bg-dark">
+  <nav class="fixed-top navbar navbar-expand-md navbar-dark bg-dark">
     <div class="container">
       <span class="navbar-brand">{{ props.title }}</span>
       <button class="navbar-toggler" type="button" @click="onClick">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" ref="navbar">
-        <ul class="navbar-nav">
+        <ul class="navbar-nav ms-auto">
           <li class="nav-item">
             <router-link class="nav-link" :to="{ name: 'home' }">Accueil</router-link>
           </li>
