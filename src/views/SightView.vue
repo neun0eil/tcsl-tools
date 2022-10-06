@@ -101,7 +101,7 @@ const state = reactive({ range, type, posX, posY, metric });
 const plural = (v) => (v > 1 ? 's' : '');
 const absolute = (v) => Math.abs(Math.round(v));
 const percent = (v) => `${v * 100}%`;
-const posToMm = (v) => (v - 0.5) * 1000;
+const posToMm = (v) => (v - 0.5) * 500;
 const mmToClk = (v) =>
   Math.abs(
     Math.round(v / (TYPES[type.value] * (metric.value ? range.value : range.value * 0.9144) * 1000))
