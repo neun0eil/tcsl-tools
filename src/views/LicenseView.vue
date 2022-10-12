@@ -30,6 +30,10 @@
             />
             <label class="form-check-label" :for="`format-${k}`">ID-{{ k }}</label>
           </div>
+          <div class="form-check ms-auto">
+            <input class="form-check-input" type="checkbox" v-model="verso" id="verso" />
+            <label class="form-check-label" for="verso">Verso</label>
+          </div>
         </div>
         <button
           type="button"
@@ -66,6 +70,7 @@ const processing = ref(false);
 const selected = ref(1);
 const href = ref();
 const link = ref();
+const verso = ref(false);
 
 const worker = new Worker(new URL('@/assets/js/jspdf', import.meta.url));
 
@@ -105,10 +110,15 @@ function onClick() {
     format: FORMATS[selected.value],
     image: image.value,
     ratio: img.value.naturalWidth / img.value.naturalHeight,
+    verso: verso.value,
   });
 }
 
 watch(selected, () => {
+  revoke(href);
+});
+
+watch(verso, () => {
   revoke(href);
 });
 </script>

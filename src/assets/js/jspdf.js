@@ -1,8 +1,9 @@
 import { jsPDF } from 'jspdf';
 
 onmessage = ({ data }) => {
+  console.log(data);
   try {
-    const { format, image, ratio } = data;
+    const { format, image, ratio, verso } = data;
     const { w, h } = format;
     const r = w / h;
     const l = ratio > r;
@@ -17,9 +18,11 @@ onmessage = ({ data }) => {
     doc.setLineWidth(0.01);
     doc.setLineDash([0.04], 0);
     doc.addImage(image, 'png', 1 + ix, 1 + iy, iw, ih, 'license', 'slow', 0);
-    doc.addImage(image, 'png', jx + w, jy, iw, ih, 'license', 'slow', 180);
     doc.roundedRect(1, 1, w, h, 0.125, 0.125);
-    doc.roundedRect(1, 1 + h, w, h, 0.125, 0.125);
+    if (verso) {
+      doc.addImage(image, 'png', jx + w, jy, iw, ih, 'license', 'slow', 180);
+      doc.roundedRect(1, 1 + h, w, h, 0.125, 0.125);
+    }
     postMessage(doc.output('blob'));
   } catch (e) {
     console.error(e);
